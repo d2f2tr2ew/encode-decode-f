@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encoder & Decoder Studio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 전역 박스 사이징 및 중앙 정렬 보장 CSS */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .layout-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+        }
+        textarea, code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* 커스텀 스크롤바 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 flex flex-col items-center transition-colors duration-200">
+
+    <!-- Header & Navigation -->
+    <header class="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="layout-container flex items-center justify-between h-16">
+            <!-- Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 flex-shrink-0">
+                    <i class="fa-solid fa-code-compare text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-tight">Encoder Studio</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">All-in-one Web Converter</p>
+                </div>
+            </div>
+
+            <!-- Controls Right Header -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- GitHub Link Button -->
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="p-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="GitHub">
+                    <i class="fa-brands fa-github text-xl"></i>
+                </a>
+                
+                <!-- Dark/Light Theme Toggle -->
+                <button id="themeToggleBtn" class="p-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="테마 변경">
+                    <i id="themeIcon" class="fa-solid fa-moon text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="layout-container flex-1 py-8 flex flex-col gap-6">
+
+        <!-- Top Control Panel: Format Selection & Mode Switch -->
+        <div class="w-full bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            
+            <!-- Type Tabs (5 Types: Base64, URL, Hex, UTF-8, ASCII) -->
+            <div class="flex flex-wrap items-center gap-1.5" id="typeTabs">
+                <button data-type="base64" class="tab-btn px-3.5 py-2 rounded-xl text-sm font-medium transition-all bg-sky-500 text-white shadow-sm">Base64</button>
+                <button data-type="url" class="tab-btn px-3.5 py-2 rounded-xl text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50">URL</button>
+                <button data-type="hex" class="tab-btn px-3.5 py-2 rounded-xl text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50">Hex</button>
+                <button data-type="utf8" class="tab-btn px-3.5 py-2 rounded-xl text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50">UTF-8</button>
+                <button data-type="ascii" class="tab-btn px-3.5 py-2 rounded-xl text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50">ASCII</button>
+            </div>
+
+            <!-- Mode Selector (Encode / Decode) -->
+            <div id="modeToggleContainer" class="flex items-center justify-center bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 flex-shrink-0">
+                <button id="modeEncode" class="flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm">
+                    인코딩 (Encode)
+                </button>
+                <button id="modeDecode" class="flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                    디코딩 (Decode)
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Format Guide Hint Bar -->
+        <div id="formatHintBar" class="w-full px-4 py-2.5 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-800/50 text-xs text-sky-800 dark:text-sky-300 flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-sky-500 flex-shrink-0"></i>
+            <span id="formatHintText">UTF-8 문자열과 Base64 포맷 간 양방향 변환을 지원합니다.</span>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-opacity duration-300">
+            <i class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600"></i>
+            <span id="toastMessage" class="text-sm font-medium">클립보드에 복사되었습니다!</span>
+        </div>
+
+        <!-- Main Workspace (Dual Cards + Center Swap) -->
+        <div class="w-full flex flex-col lg:flex-row items-stretch gap-4 lg:gap-5 flex-1">
+            
+            <!-- Input Card -->
+            <div class="w-full flex-1 flex flex-col bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm min-w-0">
+                <!-- Header Actions -->
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100 dark:border-slate-700/50">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                        <h2 class="font-semibold text-sm text-slate-700 dark:text-slate-300 uppercase tracking-wider">입력 (Input)</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- Sample Buttons -->
+                        <button id="sampleBtn" class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors font-medium">
+                            <i class="fa-solid fa-lightbulb mr-1 text-amber-500"></i>샘플 입력
+                        </button>
+                        <!-- Clear Button -->
+                        <button id="clearBtn" class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 dark:bg-slate-700/50 dark:hover:bg-red-950/40 text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 transition-colors font-medium">
+                            <i class="fa-solid fa-trash-can mr-1"></i>지우기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Textarea -->
+                <div class="relative flex-1 min-h-[280px] flex flex-col">
+                    <textarea id="inputText" placeholder="여기에 변환할 텍스트를 입력하세요..." 
+                        class="w-full h-full flex-1 p-4 bg-slate-50 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/50 resize-none font-mono text-sm leading-relaxed"></textarea>
+                </div>
+
+                <!-- Input Counter Footer -->
+                <div class="mt-3 pt-2 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-mono">
+                    <div class="flex gap-4">
+                        <span>문자: <strong id="inputCharCount" class="text-slate-600 dark:text-slate-400 font-semibold">0</strong></span>
+                        <span>바이트: <strong id="inputByteCount" class="text-slate-600 dark:text-slate-400 font-semibold">0 B</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Swap Button (Centered cleanly on both Mobile and Desktop) -->
+            <div class="flex items-center justify-center self-center py-1 lg:py-0 flex-shrink-0">
+                <button id="swapBtn" class="w-11 h-11 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 dark:hover:text-white shadow-md hover:rotate-180 transition-all duration-300 flex items-center justify-center" title="입력/출력 맞바꾸기">
+                    <i class="fa-solid fa-right-left text-sm rotate-90 lg:rotate-0"></i>
+                </button>
+            </div>
+
+            <!-- Output Card -->
+            <div class="w-full flex-1 flex flex-col bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm min-w-0">
+                <!-- Header Actions -->
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100 dark:border-slate-700/50">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                        <h2 class="font-semibold text-sm text-slate-700 dark:text-slate-300 uppercase tracking-wider">결과 (Output)</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- Copy Button -->
+                        <button id="copyBtn" class="text-xs px-3.5 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-medium transition-colors shadow-sm flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>결과 복사</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Textarea Output Area -->
+                <div class="relative flex-1 min-h-[280px] flex flex-col">
+                    <textarea id="outputText" readonly placeholder="변환된 결과가 여기에 표시됩니다..." 
+                        class="w-full h-full flex-1 p-4 bg-slate-50 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700/70 rounded-xl focus:outline-none resize-none font-mono text-sm leading-relaxed"></textarea>
+                    
+                    <!-- Error Overlay Banner -->
+                    <div id="errorBanner" class="hidden absolute inset-x-0 bottom-0 bg-red-500/10 border-t border-red-500/30 backdrop-blur-sm p-3 rounded-b-xl flex items-start gap-2 text-red-600 dark:text-red-400 text-xs">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5 flex-shrink-0"></i>
+                        <span id="errorMessage" class="break-all font-mono">올바르지 않은 형식입니다.</span>
+                    </div>
+                </div>
+
+                <!-- Output Counter Footer -->
+                <div class="mt-3 pt-2 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-mono">
+                    <div class="flex gap-4">
+                        <span>문자: <strong id="outputCharCount" class="text-slate-600 dark:text-slate-400 font-semibold">0</strong></span>
+                        <span>바이트: <strong id="outputByteCount" class="text-slate-600 dark:text-slate-400 font-semibold">0 B</strong></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-5 mt-auto">
+        <div class="layout-container text-center text-xs text-slate-500 dark:text-slate-400">
+            <p>100% 클라이언트 사이드 변환 - 모든 데이터는 사용자의 브라우저 내에서 안전하게 처리됩니다.</p>
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // App State
+            const state = {
+                type: 'base64', // base64, url, hex, utf8, ascii
+                mode: 'encode', // encode, decode
+                theme: 'dark'   // dark, light
+            };
+
+            // DOM Elements
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            const errorBanner = document.getElementById('errorBanner');
+            const errorMessage = document.getElementById('errorMessage');
+            const formatHintText = document.getElementById('formatHintText');
+
+            const typeTabs = document.getElementById('typeTabs');
+            const modeEncode = document.getElementById('modeEncode');
+            const modeDecode = document.getElementById('modeDecode');
+
+            const sampleBtn = document.getElementById('sampleBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const swapBtn = document.getElementById('swapBtn');
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const themeIcon = document.getElementById('themeIcon');
+
+            const inputCharCount = document.getElementById('inputCharCount');
+            const inputByteCount = document.getElementById('inputByteCount');
+            const outputCharCount = document.getElementById('outputCharCount');
+            const outputByteCount = document.getElementById('outputByteCount');
+
+            // --- Theme Control ---
+            function initTheme() {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    state.theme = 'light';
+                }
+                applyTheme();
+            }
+
+            function applyTheme() {
+                if (state.theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    themeIcon.className = 'fa-solid fa-sun text-xl text-amber-400';
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    themeIcon.className = 'fa-solid fa-moon text-xl text-slate-600';
+                }
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                state.theme = state.theme === 'dark' ? 'light' : 'dark';
+                applyTheme();
+            });
+
+            // --- UTF-8 & Encoding Helper Functions ---
+            function getByteLength(str) {
+                return new Blob([str]).size;
+            }
+
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            function utf8ToBase64(str) {
+                const bytes = new TextEncoder().encode(str);
+                let binary = '';
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return btoa(binary);
+            }
+
+            function base64ToUtf8(str) {
+                const cleanStr = str.trim().replace(/\s+/g, '');
+                const binary = atob(cleanStr);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+            }
+
+            // --- Format Hints ---
+            const formatHints = {
+                base64: 'UTF-8 문자열과 Base64 포맷 간 양방향 변환을 지원합니다 (한글 및 이모지 완벽 지원).',
+                url: 'URL 구성 요소를 안전한 퍼센트 인코딩(%XX) 형식으로 변환하거나 원래 문자열로 디코딩합니다.',
+                hex: '문자열을 UTF-8 바이트 단위 16진수(예: 48 65 6C 6C 6F)로 변환하거나 복원합니다.',
+                utf8: '인코딩: UTF-8 바이트(\\xED\\x95\\x9C) 및 유니코드(U+D55C) 분석 | 디코딩: ED 95 9C, \\xED, \\uD55C, U+D55C 표기를 모두 유연하게 복원합니다.',
+                ascii: '문자열과 10진수 ASCII 코드 배열(예: 72 101 108 108 111) 간 상호 변환합니다. (디코딩 시 공백·쉼표 구분 지원)'
+            };
+
+            // --- Encoding/Decoding Converters ---
+            const converters = {
+                base64: {
+                    encode: (input) => utf8ToBase64(input),
+                    decode: (input) => base64ToUtf8(input)
+                },
+                url: {
+                    encode: (input) => encodeURIComponent(input),
+                    decode: (input) => decodeURIComponent(input)
+                },
+                hex: {
+                    encode: (input) => {
+                        const encoder = new TextEncoder();
+                        const bytes = encoder.encode(input);
+                        return Array.from(bytes).map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+                    },
+                    decode: (input) => {
+                        const cleanHex = input.replace(/(0x|\\x|,|\s+)/gi, '');
+                        if (!/^[0-9a-fA-F]*$/.test(cleanHex)) {
+                            throw new Error('유효하지 않은 16진수(Hex) 문자가 포함되어 있습니다.');
+                        }
+                        if (cleanHex.length % 2 !== 0) {
+                            throw new Error('Hex 문자열은 2자리(1바이트) 단위여야 합니다.');
+                        }
+                        const bytes = new Uint8Array(cleanHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                        const decoder = new TextDecoder('utf-8', { fatal: true });
+                        return decoder.decode(bytes);
+                    }
+                },
+                utf8: {
+                    encode: (input) => {
+                        const encoder = new TextEncoder();
+                        const bytes = encoder.encode(input);
+                        const hexSpaced = Array.from(bytes).map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+                        const hexEscaped = Array.from(bytes).map(b => '\\x' + b.toString(16).toUpperCase().padStart(2, '0')).join('');
+                        
+                        const codePoints = Array.from(input).map(ch => {
+                            const cp = ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+                            return 'U+' + cp;
+                        }).join(' ');
+
+                        const jsEscaped = Array.from(input).map(ch => {
+                            const code = ch.codePointAt(0);
+                            if (code <= 0xFFFF) {
+                                return '\\u' + code.toString(16).toUpperCase().padStart(4, '0');
+                            } else {
+                                return '\\u{' + code.toString(16).toUpperCase() + '}';
+                            }
+                        }).join('');
+
+                        return [
+                            `[UTF-8 바이트 (Hex)]`,
+                            hexSpaced,
+                            ``,
+                            `[UTF-8 이스케이프 (\\xXX)]`,
+                            hexEscaped,
+                            ``,
+                            `[유니코드 코드포인트 (U+XXXX)]`,
+                            codePoints,
+                            ``,
+                            `[JS/JSON 유니코드 이스케이프 (\\uXXXX)]`,
+                            jsEscaped
+                        ].join('\n');
+                    },
+                    decode: (input) => {
+                        let trimmed = input.trim();
+                        
+                        // 인코딩 출력 결과 전체를 그대로 붙여넣은 경우 첫 번째 섹션 자동 추출
+                        if (trimmed.startsWith('[UTF-8 바이트 (Hex)]')) {
+                            const lines = trimmed.split('\n');
+                            if (lines.length >= 2) {
+                                trimmed = lines[1].trim();
+                            }
+                        }
+
+                        // 1. \u{XXXXX} 또는 \uXXXX 또는 U+XXXX 유니코드 코드포인트 표기 파싱
+                        if (/^(?:(?:\\u\{[0-9a-fA-F]{1,6}\}|\\u[0-9a-fA-F]{4}|U\+[0-9a-fA-F]{4,6})\s*,?\s*)+$/i.test(trimmed)) {
+                            const tokens = trimmed.match(/\\u\{[0-9a-fA-F]{1,6}\}|\\u[0-9a-fA-F]{4}|U\+[0-9a-fA-F]{4,6}/gi);
+                            return tokens.map(token => {
+                                const hex = token.replace(/^(\\u\{|\\u|U\+)|\}$/gi, '');
+                                const cp = parseInt(hex, 16);
+                                if (cp > 0x10FFFF) throw new Error(`유효하지 않은 유니코드 범위입니다: ${token}`);
+                                return String.fromCodePoint(cp);
+                            }).join('');
+                        }
+
+                        // 2. 혼합된 문자열 내 \uXXXX / \xXX 이스케이프 치환 지원
+                        if (/\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]{1,6}\}/.test(trimmed) && !/^(?:\\x[0-9a-fA-F]{2}\s*)+$/i.test(trimmed)) {
+                            return trimmed
+                                .replace(/\\u\{([0-9a-fA-F]{1,6})\}/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+                                .replace(/\\u([0-9a-fA-F]{4})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+                        }
+
+                        // 3. UTF-8 바이트 16진수 배열 파싱 (공백 구분 'ED 95 9C', '\xED\x95\x9C', '0xED, 0x95', 연속 16진수 'ED959C')
+                        const cleanHex = trimmed.replace(/(?:0x|\\x|,|\s+)/gi, '');
+                        if (!/^[0-9a-fA-F]+$/.test(cleanHex)) {
+                            throw new Error('올바른 UTF-8 16진수 바이트(예: ED 95 9C, \\xED\\x95\\x9C) 또는 유니코드(U+D55C, \\uD55C) 형식을 입력하세요.');
+                        }
+                        if (cleanHex.length % 2 !== 0) {
+                            throw new Error('UTF-8 바이트 16진수는 2자리(1바이트) 단위여야 합니다.');
+                        }
+                        const bytes = new Uint8Array(cleanHex.match(/.{1,2}/g).map(b => parseInt(b, 16)));
+                        const decoder = new TextDecoder('utf-8', { fatal: true });
+                        return decoder.decode(bytes);
+                    }
+                },
+                ascii: {
+                    encode: (input) => {
+                        const codes = [];
+                        const nonAsciiChars = [];
+
+                        for (const ch of input) {
+                            const code = ch.codePointAt(0);
+                            if (code <= 127) {
+                                codes.push(code.toString(10));
+                            } else {
+                                nonAsciiChars.push(`${ch}(${code})`);
+                                codes.push(`[비-ASCII:${ch}=${code}]`);
+                            }
+                        }
+
+                        if (nonAsciiChars.length > 0) {
+                            throw new Error(`표준 ASCII 범위(0~127)를 벗어난 문자가 포함되어 있습니다: ${nonAsciiChars.slice(0, 5).join(', ')}${nonAsciiChars.length > 5 ? ' 외...' : ''}`);
+                        }
+
+                        return codes.join(' ');
+                    },
+                    decode: (input) => {
+                        const trimmed = input.trim();
+                        if (!trimmed) return '';
+
+                        // 공백, 쉼표, 세미콜론 등으로 구분된 10진수 코드 분리
+                        const tokens = trimmed.split(/[\s,;]+/).filter(Boolean);
+                        const chars = tokens.map(token => {
+                            if (!/^\d+$/.test(token)) {
+                                throw new Error(`유효하지 않은 10진수 코드입니다: "${token}" (0~127 사이의 숫자만 입력 가능)`);
+                            }
+                            const num = parseInt(token, 10);
+                            if (num < 0 || num > 127) {
+                                throw new Error(`ASCII 범위(0~127)를 초과한 코드입니다: ${num}`);
+                            }
+                            return String.fromCharCode(num);
+                        });
+
+                        return chars.join('');
+                    }
+                }
+            };
+
+            // --- Sample Data Preset ---
+            const samples = {
+                base64: {
+                    encode: "안녕하세요! Encoder & Decoder Studio에 오신 것을 환영합니다 🚀",
+                    decode: "7JWI64WV7ZWY7IS47YohIEVuY29kZXIgJiBEZWNvZGVyIFN0dWRpbyDsl5Ag7Jik7IugIOqyg+ydhCDtmZjtmIHtlanri4jri6Qg8J+agA=="
+                },
+                url: {
+                    encode: "https://example.com/search?q=개발자 툴&category=인코딩",
+                    decode: "https%3A%2F%2Fexample.com%2Fsearch%3Fq%3D%EA%B0%9C%EB%B0%9C%EC%9E%90%20%ED%89%B0%26category%3D%EC%9D%B8%EC%BD%94%EB%94%A9"
+                },
+                hex: {
+                    encode: "Hello World!",
+                    decode: "48 65 6C 6C 6F 20 57 6F 72 6C 64 21"
+                },
+                utf8: {
+                    encode: "한글 UTF-8 🚀",
+                    decode: "ED 95 9C EA B8 80 20 55 54 46 2D 38 20 F0 9F 9A 80"
+                },
+                ascii: {
+                    encode: "Hello, ASCII 123!",
+                    decode: "72 101 108 108 111 44 32 65 83 67 73 73 32 49 50 51 33"
+                }
+            };
+
+            // --- Process Conversion ---
+            function processConversion() {
+                const val = inputText.value;
+                
+                // Update input stats
+                const inputLength = val.length;
+                const inputBytes = getByteLength(val);
+                inputCharCount.textContent = inputLength.toLocaleString();
+                inputByteCount.textContent = formatBytes(inputBytes);
+
+                if (!val) {
+                    outputText.value = '';
+                    hideError();
+                    updateOutputStats('');
+                    return;
+                }
+
+                try {
+                    const converter = converters[state.type];
+                    const fn = converter[state.mode];
+                    
+                    if (!fn) throw new Error('지원하지 않는 변환 모드입니다.');
+
+                    const result = fn(val);
+                    outputText.value = result;
+                    updateOutputStats(result);
+                    hideError();
+                } catch (err) {
+                    showError(err.message || '변환 처리 중 오류가 발생했습니다.');
+                    outputText.value = '';
+                    updateOutputStats('');
+                }
+            }
+
+            function updateOutputStats(str) {
+                const length = str.length;
+                const bytes = getByteLength(str);
+                outputCharCount.textContent = length.toLocaleString();
+                outputByteCount.textContent = formatBytes(bytes);
+            }
+
+            function showError(msg) {
+                errorMessage.textContent = msg;
+                errorBanner.classList.remove('hidden');
+            }
+
+            function hideError() {
+                errorBanner.classList.add('hidden');
+            }
+
+            // --- UI Handlers ---
+            function updateUI() {
+                // Update Tabs styling
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    if (btn.dataset.type === state.type) {
+                        btn.className = 'tab-btn px-3.5 py-2 rounded-xl text-sm font-medium transition-all bg-sky-500 text-white shadow-sm';
+                    } else {
+                        btn.className = 'tab-btn px-3.5 py-2 rounded-xl text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50';
+                    }
+                });
+
+                // Update Format Hint
+                formatHintText.textContent = formatHints[state.type] || '';
+
+                // Update Mode buttons
+                if (state.mode === 'encode') {
+                    modeEncode.className = 'flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm';
+                    modeDecode.className = 'flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+                } else {
+                    modeDecode.className = 'flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-sm font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm';
+                    modeEncode.className = 'flex-1 md:flex-initial px-4 py-1.5 rounded-lg text-sm font-semibold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+                }
+
+                processConversion();
+            }
+
+            // Toast message Helper
+            function showToast(msg) {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toastMessage');
+                toastMsg.textContent = msg;
+                toast.classList.remove('hidden');
+                toast.classList.add('opacity-100');
+                
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100');
+                    setTimeout(() => toast.classList.add('hidden'), 300);
+                }, 2000);
+            }
+
+            // Event Listeners
+            inputText.addEventListener('input', processConversion);
+
+            typeTabs.addEventListener('click', (e) => {
+                const btn = e.target.closest('.tab-btn');
+                if (btn) {
+                    state.type = btn.dataset.type;
+                    updateUI();
+                }
+            });
+
+            modeEncode.addEventListener('click', () => {
+                if (state.mode !== 'encode') {
+                    state.mode = 'encode';
+                    updateUI();
+                }
+            });
+
+            modeDecode.addEventListener('click', () => {
+                if (state.mode !== 'decode') {
+                    state.mode = 'decode';
+                    updateUI();
+                }
+            });
+
+            sampleBtn.addEventListener('click', () => {
+                const sampleVal = samples[state.type] ? samples[state.type][state.mode] : '';
+                inputText.value = sampleVal;
+                processConversion();
+            });
+
+            clearBtn.addEventListener('click', () => {
+                inputText.value = '';
+                processConversion();
+                inputText.focus();
+            });
+
+            swapBtn.addEventListener('click', () => {
+                let currentOutput = outputText.value;
+                if (!currentOutput) return;
+
+                // UTF-8 인코딩 결과에서 Swap 시 첫 번째 섹션(UTF-8 바이트 Hex)만 깔끔하게 추출하여 입력으로 전달
+                if (state.type === 'utf8' && state.mode === 'encode' && currentOutput.startsWith('[UTF-8 바이트 (Hex)]')) {
+                    const lines = currentOutput.split('\n');
+                    if (lines.length >= 2) {
+                        currentOutput = lines[1].trim();
+                    }
+                }
+
+                // Swap modes
+                state.mode = state.mode === 'encode' ? 'decode' : 'encode';
+                inputText.value = currentOutput;
+                updateUI();
+            });
+
+            copyBtn.addEventListener('click', () => {
+                const textToCopy = outputText.value;
+                if (!textToCopy) return;
+
+                // ExecCommand fallback for iframe clipboard restriction
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = textToCopy;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('클립보드에 복사되었습니다!');
+                } catch (err) {
+                    showToast('복사에 실패했습니다.');
+                }
+                document.body.removeChild(tempTextArea);
+            });
+
+            // Initialize App
+            initTheme();
+            updateUI();
+        });
+    </script>
+</body>
+</html>
