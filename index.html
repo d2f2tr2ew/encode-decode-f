@@ -24,8 +24,8 @@
             }
         }
     </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -76,11 +76,11 @@
             <!-- Logo -->
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 flex-shrink-0">
-                    <i class="fa-solid fa-code-compare text-xl"></i>
+                    <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-tight tracking-tight">Encoder Studio</h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">All-in-one Web Converter</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">올인원 웹 인코딩 / 디코딩 툴</p>
                 </div>
             </div>
 
@@ -88,12 +88,14 @@
             <div class="flex items-center gap-2 sm:gap-3">
                 <!-- GitHub Link Button -->
                 <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="p-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="GitHub">
-                    <i class="fa-brands fa-github text-xl"></i>
+                    <i data-lucide="github" class="w-5 h-5"></i>
                 </a>
                 
                 <!-- Dark/Light Theme Toggle -->
                 <button id="themeToggleBtn" class="p-2.5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="테마 변경">
-                    <i id="themeIcon" class="fa-solid fa-moon text-xl"></i>
+                    <span id="themeIconWrap">
+                        <i data-lucide="sun" class="w-5 h-5 text-amber-400"></i>
+                    </span>
                 </button>
             </div>
         </div>
@@ -128,13 +130,13 @@
 
         <!-- Format Guide Hint Bar -->
         <div id="formatHintBar" class="w-full px-4 py-2.5 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-800/50 text-xs text-sky-800 dark:text-sky-300 flex items-center gap-2">
-            <i class="fa-solid fa-circle-info text-sky-500 flex-shrink-0"></i>
+            <i data-lucide="info" class="w-4 h-4 text-sky-500 flex-shrink-0"></i>
             <span id="formatHintText">UTF-8 문자열과 Base64 포맷 간 양방향 변환을 지원합니다.</span>
         </div>
 
         <!-- Notification Toast -->
         <div id="toast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-opacity duration-300">
-            <i class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600"></i>
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
             <span id="toastMessage" class="text-sm font-medium">클립보드에 복사되었습니다!</span>
         </div>
 
@@ -150,13 +152,15 @@
                         <h2 class="font-semibold text-sm text-slate-700 dark:text-slate-300 uppercase tracking-wider">입력 (Input)</h2>
                     </div>
                     <div class="flex items-center gap-2">
-                        <!-- Sample Buttons -->
-                        <button id="sampleBtn" class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors font-medium">
-                            <i class="fa-solid fa-lightbulb mr-1 text-amber-500"></i>샘플 입력
+                        <!-- Sample Button -->
+                        <button id="sampleBtn" class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors font-medium inline-flex items-center gap-1.5">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+                            <span>샘플 입력</span>
                         </button>
                         <!-- Clear Button -->
-                        <button id="clearBtn" class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 dark:bg-slate-700/50 dark:hover:bg-red-950/40 text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 transition-colors font-medium">
-                            <i class="fa-solid fa-trash-can mr-1"></i>지우기
+                        <button id="clearBtn" class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 dark:bg-slate-700/50 dark:hover:bg-red-950/40 text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 transition-colors font-medium inline-flex items-center gap-1.5">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>지우기</span>
                         </button>
                     </div>
                 </div>
@@ -179,7 +183,7 @@
             <!-- Swap Button (Centered cleanly on both Mobile and Desktop) -->
             <div class="flex items-center justify-center self-center py-1 lg:py-0 flex-shrink-0">
                 <button id="swapBtn" class="w-11 h-11 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 dark:hover:text-white shadow-md hover:rotate-180 transition-all duration-300 flex items-center justify-center" title="입력/출력 맞바꾸기">
-                    <i class="fa-solid fa-right-left text-sm rotate-90 lg:rotate-0"></i>
+                    <i data-lucide="arrow-left-right" class="w-4 h-4 rotate-90 lg:rotate-0"></i>
                 </button>
             </div>
 
@@ -193,8 +197,8 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <!-- Copy Button -->
-                        <button id="copyBtn" class="text-xs px-3.5 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-medium transition-colors shadow-sm flex items-center gap-1.5">
-                            <i class="fa-regular fa-copy"></i>
+                        <button id="copyBtn" class="text-xs px-3.5 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-medium transition-colors shadow-sm inline-flex items-center gap-1.5">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
                             <span>결과 복사</span>
                         </button>
                     </div>
@@ -207,7 +211,7 @@
                     
                     <!-- Error Overlay Banner -->
                     <div id="errorBanner" class="hidden absolute inset-x-0 bottom-0 bg-red-500/10 border-t border-red-500/30 backdrop-blur-sm p-3 rounded-b-xl flex items-start gap-2 text-red-600 dark:text-red-400 text-xs">
-                        <i class="fa-solid fa-triangle-exclamation mt-0.5 flex-shrink-0"></i>
+                        <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5 flex-shrink-0"></i>
                         <span id="errorMessage" class="break-all font-mono">올바르지 않은 형식입니다.</span>
                     </div>
                 </div>
@@ -235,6 +239,11 @@
     <!-- Application Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Render Lucide icons initially
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
             // App State
             const state = {
                 type: 'base64', // base64, url, hex, utf8, ascii
@@ -258,7 +267,7 @@
             const copyBtn = document.getElementById('copyBtn');
             const swapBtn = document.getElementById('swapBtn');
             const themeToggleBtn = document.getElementById('themeToggleBtn');
-            const themeIcon = document.getElementById('themeIcon');
+            const themeIconWrap = document.getElementById('themeIconWrap');
 
             const inputCharCount = document.getElementById('inputCharCount');
             const inputByteCount = document.getElementById('inputByteCount');
@@ -276,10 +285,13 @@
             function applyTheme() {
                 if (state.theme === 'dark') {
                     document.documentElement.classList.add('dark');
-                    themeIcon.className = 'fa-solid fa-sun text-xl text-amber-400';
+                    themeIconWrap.innerHTML = '<i data-lucide="sun" class="w-5 h-5 text-amber-400"></i>';
                 } else {
                     document.documentElement.classList.remove('dark');
-                    themeIcon.className = 'fa-solid fa-moon text-xl text-slate-600';
+                    themeIconWrap.innerHTML = '<i data-lucide="moon" class="w-5 h-5 text-slate-600"></i>';
+                }
+                if (window.lucide) {
+                    lucide.createIcons();
                 }
             }
 
@@ -312,6 +324,9 @@
 
             function base64ToUtf8(str) {
                 const cleanStr = str.trim().replace(/\s+/g, '');
+                if (!/^[A-Za-z0-9+/]*={0,2}$/.test(cleanStr) || cleanStr.length % 4 !== 0) {
+                    throw new Error('유효하지 않은 Base64 문자열 형식입니다.');
+                }
                 const binary = atob(cleanStr);
                 const bytes = new Uint8Array(binary.length);
                 for (let i = 0; i < binary.length; i++) {
@@ -320,9 +335,14 @@
                 return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
             }
 
+            function textToUtf8HexBytes(str) {
+                const bytes = new TextEncoder().encode(str);
+                return Array.from(bytes).map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+            }
+
             // --- Format Hints ---
             const formatHints = {
-                base64: 'UTF-8 문자열과 Base64 포맷 간 양방향 변환을 지원합니다 (한글 및 이모지 완벽 지원).',
+                base64: 'UTF-8 문자열과 Base64 포맷 간 양방향 변환을 지원합니다 (한글 및 유니코드 완벽 지원).',
                 url: 'URL 구성 요소를 안전한 퍼센트 인코딩(%XX) 형식으로 변환하거나 원래 문자열로 디코딩합니다.',
                 hex: '문자열을 UTF-8 바이트 단위 16진수(예: 48 65 6C 6C 6F)로 변환하거나 복원합니다.',
                 utf8: '인코딩: UTF-8 바이트(\\xED\\x95\\x9C) 및 유니코드(U+D55C) 분석 | 디코딩: ED 95 9C, \\xED, \\uD55C, U+D55C 표기를 모두 유연하게 복원합니다.',
@@ -340,11 +360,7 @@
                     decode: (input) => decodeURIComponent(input)
                 },
                 hex: {
-                    encode: (input) => {
-                        const encoder = new TextEncoder();
-                        const bytes = encoder.encode(input);
-                        return Array.from(bytes).map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
-                    },
+                    encode: (input) => textToUtf8HexBytes(input),
                     decode: (input) => {
                         const cleanHex = input.replace(/(0x|\\x|,|\s+)/gi, '');
                         if (!/^[0-9a-fA-F]*$/.test(cleanHex)) {
@@ -415,7 +431,7 @@
                             }).join('');
                         }
 
-                        // 2. 혼합된 문자열 내 \uXXXX / \xXX 이스케이프 치환 지원
+                        // 2. 혼합된 문자열 내 \uXXXX 이스케이프 치환 지원
                         if (/\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]{1,6}\}/.test(trimmed) && !/^(?:\\x[0-9a-fA-F]{2}\s*)+$/i.test(trimmed)) {
                             return trimmed
                                 .replace(/\\u\{([0-9a-fA-F]{1,6})\}/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
@@ -446,7 +462,6 @@
                                 codes.push(code.toString(10));
                             } else {
                                 nonAsciiChars.push(`${ch}(${code})`);
-                                codes.push(`[비-ASCII:${ch}=${code}]`);
                             }
                         }
 
@@ -478,27 +493,35 @@
                 }
             };
 
-            // --- Sample Data Preset ---
+            // --- Sample Data Preset (이모지 완전 제거 + 동적 인코딩으로 100% 무결성 보장) ---
+            const rawSamples = {
+                base64: "안녕하세요! GitHub Pages용 인코딩/디코딩 툴입니다.",
+                url: "https://example.com/search?q=한글 테스트&lang=ko",
+                hex: "Hello, 안녕하세요!",
+                utf8: "한국어 UTF-8 인코딩 테스트",
+                ascii: "Hello, GitHub! 2026"
+            };
+
             const samples = {
                 base64: {
-                    encode: "안녕하세요! Encoder & Decoder Studio에 오신 것을 환영합니다",
-                    decode: "7JWI64WV7ZWY7IS47YohIEVuY29kZXIgJiBEZWNvZGVyIFN0dWRpbyDsl5Ag7Jik7IugIOqyg+ydhCDtmZjtmIHtlanri4jri6Qg8J+agA=="
+                    encode: rawSamples.base64,
+                    decode: converters.base64.encode(rawSamples.base64)
                 },
                 url: {
-                    encode: "https://example.com/search?q=개발자 툴&category=인코딩",
-                    decode: "https%3A%2F%2Fexample.com%2Fsearch%3Fq%3D%EA%B0%9C%EB%B0%9C%EC%9E%90%20%ED%89%B0%26category%3D%EC%9D%B8%EC%BD%94%EB%94%A9"
+                    encode: rawSamples.url,
+                    decode: converters.url.encode(rawSamples.url)
                 },
                 hex: {
-                    encode: "Hello World!",
-                    decode: "48 65 6C 6C 6F 20 57 6F 72 6C 64 21"
+                    encode: rawSamples.hex,
+                    decode: converters.hex.encode(rawSamples.hex)
                 },
                 utf8: {
-                    encode: "한글 UTF-8",
-                    decode: "ED 95 9C EA B8 80 20 55 54 46 2D 38 20 F0 9F 9A 80"
+                    encode: rawSamples.utf8,
+                    decode: textToUtf8HexBytes(rawSamples.utf8)
                 },
                 ascii: {
-                    encode: "Hello, ASCII 123!",
-                    decode: "72 101 108 108 111 44 32 65 83 67 73 73 32 49 50 51 33"
+                    encode: rawSamples.ascii,
+                    decode: converters.ascii.encode(rawSamples.ascii)
                 }
             };
 
